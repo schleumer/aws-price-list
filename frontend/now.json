@@ -1,0 +1,11 @@
+{
+  "version": 2,
+  "builds": [
+    { "src": "backend/index.js", "use": "@now/node" },
+    { "src": "frontend/package.json", "use": "@now/next" }
+  ],
+  "routes": [
+    { "src": "/api", "dest": "/backend/index.js" },
+    { "src": "/(.*)", "dest": "/frontend/$1" }
+  ]
+}
