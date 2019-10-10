@@ -194,6 +194,7 @@ const downloadJSON = async (message, url) => {
             if (!products.hasOwnProperty(t)) {
               products[t] = {
                 type: t,
+                search: t,
                 variations: []
               }
             }
@@ -245,16 +246,23 @@ const downloadJSON = async (message, url) => {
             let onDemandLengthInHours = 0
             let reservedLengthInHours = 0
 
+            let isAllUpfront = false
+            let isPartialUpfront = false
+            let isNoUpfront = false
+
             switch (purchaseOption.replace(/\s/, '').toLowerCase()) {
               case 'allupfront':
+                isAllUpfront = true
                 onDemandLengthInHours = 0
                 reservedLengthInHours = lengthInHours
                 break;
               case 'partialupfront':
-                onDemandLengthInHours = lengthInHours / 2
-                reservedLengthInHours = lengthInHours / 2
+                isPartialUpfront = true
+                onDemandLengthInHours = lengthInHours
+                reservedLengthInHours = lengthInHours
                 break;
               case 'noupfront':
+                isNoUpfront = true
                 onDemandLengthInHours = lengthInHours
                 reservedLengthInHours = 0
                 break;
@@ -287,7 +295,21 @@ const downloadJSON = async (message, url) => {
             const totalPricePerHour = reservedPricePerHour + onDemandPricePerHour
             const totalPrice = totalPriceOnDemand + totalPriceReserved
 
+            let score = lengthInHours
+
+            if (isNoUpfront) {
+              score += 1;
+            } else if (isPartialUpfront) {
+              score += 2;
+            } else if (isAllUpfront) {
+              score += 3;
+            }
+
             rates.push({
+              score,
+              isAllUpfront,
+              isPartialUpfront,
+              isNoUpfront,
               skus: [onDemandPriceItem && onDemandPriceItem.rateCode, upfrontPriceItem && upfrontPriceItem.rateCode].filter(_ => !!_),
               totalPriceOnDemand,
               totalPriceReserved,
@@ -310,6 +332,7 @@ const downloadJSON = async (message, url) => {
             for (const rateSku in term.priceDimensions) {
               const price = term.priceDimensions[rateSku]
               rates.push({
+                score: -1,
                 skus: [rateSku],
                 totalPricePerHour: parseFloat(price.pricePerUnit.USD),
                 onDemandPricePerHour: parseFloat(price.pricePerUnit.USD),
@@ -333,6 +356,10 @@ const downloadJSON = async (message, url) => {
                 variation.offers = variation.offers.concat(fetchRates(product, variation, term))
               }
             }
+
+            variation.offers = variation.offers.sort((a, b) => {
+              return (a.score > b.score) ? 1 : -1;
+            })
           }
 
           return product

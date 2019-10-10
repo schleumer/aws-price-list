@@ -1,23 +1,14 @@
-require('dotenv').config()
+const fs = require('fs')
 
-const path = require('path')
-const Dotenv = require('dotenv-webpack')
+let env = process.env
+if (fs.existsSync('./.env')) {
+  env = require('dotenv')
+    .parse(fs.readFileSync('./.env'))
+}
 
 module.exports = {
   target: 'serverless',
-  webpack: config => {
-    config.plugins = config.plugins || []
-
-    config.plugins = [
-      ...config.plugins,
-
-      // Read the .env file
-      new Dotenv({
-        path: path.join(__dirname, '.env'),
-        systemvars: true
-      })
-    ]
-
-    return config
+  env: {
+    API_HOST: env.API_HOST,
   }
 }

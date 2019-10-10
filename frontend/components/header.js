@@ -1,3 +1,4 @@
+import Link from "next/link"
 import { css, Global } from '@emotion/core';
 import styled from '@emotion/styled';
 
@@ -10,7 +11,11 @@ const Header1 = styled.h1`
 function Header() {
   return (
     <header>
-      <Header1>AWS Price List</Header1>
+      <Header1>
+        <Link href="/">
+          <a style={{ textDecoration: 'none', color: '#00f' }}>AWS Price List</a>
+        </Link>
+      </Header1>
     </header>
   );
 }

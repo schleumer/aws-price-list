@@ -1,11 +1,16 @@
 {
   "version": 2,
-  "builds": [
-    { "src": "backend/index.js", "use": "@now/node" },
-    { "src": "frontend/package.json", "use": "@now/next" }
-  ],
-  "routes": [
-    { "src": "/api", "dest": "/backend/index.js" },
-    { "src": "/(.*)", "dest": "/frontend/$1" }
-  ]
+  "name": "aws-prices",
+  "build": {
+      "env": {
+        "API_HOST": "https://aws-prices.wesleyschleumer.now.sh/api/query"
+      }
+  },
+  "builds": [{
+    "src": "next.config.js",
+    "use": "@now/next"
+  }, {
+    "src": ".env",
+    "use": "@now/static"
+  }]
 }
